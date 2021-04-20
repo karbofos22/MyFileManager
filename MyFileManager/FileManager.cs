@@ -4,7 +4,7 @@ using System.IO;
 using System.Linq;
 using System.Text;
 
-namespace FileManager
+namespace MyFileManager
 {
     public class FileManager
     {
@@ -13,7 +13,7 @@ namespace FileManager
         public FileManager()
         {
         }
-        public static void ShowDrives(string userInput)
+        public static void ShowDrives()
         {
             DriveInfo[] allDrives = DriveInfo.GetDrives();
             foreach (DriveInfo drives in allDrives)
@@ -21,45 +21,66 @@ namespace FileManager
                 Console.WriteLine("Drive {0}", drives.Name);
             }
             Console.WriteLine();
-            Console.WriteLine($"Список корневых папок диска: {userInput}");
-            Console.WriteLine("│");
-            DirTree(userInput, "");
-        }
-        public static void CommandsList(out string userInput)
-        {
-            Console.WriteLine(@"Список команд для работы с файловым менеджером:
-                     1. Для просмотра доступных физических дисков наберите disc и нажмите Enter.
-                     2. Для просмотра содержимого папки/диска используйте ключевое слово cd + имя папки/диска. Пример: cd temp
-                     3. 
-                     4.
-                     5. Что вы хотите сделать?");
-
-            Console.WriteLine();
-            userInput = Console.ReadLine();
-            Console.WriteLine();
-
             
         }
-        public static void UserCommands(string userInput)
+        public static void InfoList()
         {
-            string path = userInput.Substring(3) + ":\\";
-            int startIndex = 0;
-            int length = 2;
-            userInput = userInput.Substring(startIndex, length);
-
-            switch (userInput)
+            Console.WriteLine(@"Список команд и справочная информация для работы с файловым менеджером:
+              1. Для просмотра доступных физических дисков наберите ds и нажмите Enter
+              2. Для просмотра содержимого папки/диска используйте ключевое слово cd + имя папки/диска. Пример: cd temp или cd d
+                     Троеточие( ... ) после названия папки, означет, что папка не пуста
+                     Под списком папок расположен список файлов текущей папки
+              3. Для просмотра данной инормации еще раз, наберите if и нажмите Enter. ");
+            Console.WriteLine();
+        }
+        public static void UserCommands()
+        {
+            while (true)
             {
-                case "disc":
-                    ShowDrives(userInput);
-                    break;
-                case "cd":
-                case "Cd":
-                    DirTree(path, "");
-                    FileTree(path);
-                    break;
+                try
+                {
+                    string userInput = Console.ReadLine();
+                    string path = "";
+                    Console.Clear();
+                    Console.WriteLine("\t\t\t\tДля просмотра справочной информации еще раз, наберите if и нажмите Enter");
+                    Console.WriteLine();
+                    if (userInput.Length > 2 && userInput.Length < 5)
+                    {
+                        path = userInput.Substring(3) + ":\\";
+                    }
+                    else if (userInput.Length > 5)
+                        path = Directory.GetCurrentDirectory() + "\\" + userInput.Substring(3) + "\\";
+                    int startIndex = 0;
+                    int length = 2;
+                    userInput = userInput.Substring(startIndex, length);
+
+                    switch (userInput)
+                    {
+                        case "if":
+                            InfoList();
+                            break;
+                        case "ds":
+                            ShowDrives();
+                            break;
+                        case "cd":
+                        case "Cd":
+                        case "CD":
+                            Console.WriteLine(path);
+                            Console.WriteLine("│");
+                            DirTree(path, "");
+                            FileTree(path);
+                            Console.WriteLine();
+                            break;
+                        default:
+                            Console.WriteLine("Команда не распознана, попробуйте еще раз. Для просмотра справки о командах еще раз, наберите if и нажмите Enter ");
+                            break;
+                    }
+                }
+                catch (ArgumentOutOfRangeException)
+                {
+                    Console.WriteLine("Команда не распознана, попробуйте еще раз. Для просмотра справки о командах еще раз, наберите if и нажмите Enter ");
+                }
             }
-            userInput = Console.ReadLine();
-            UserCommands(userInput);
         }
 
         public static void DirTree(string path, string sidestep)
@@ -72,24 +93,29 @@ namespace FileManager
 
                 foreach (DirectoryInfo dir in dirList)
                 {
-                    if (dir == dirList.Last())
-                        Console.WriteLine(sidestep + "└──" + dir + dir.ToString().Length);
+                    if (dir == dirList.Last() && dir.GetDirectories().Length != 0)
+                        Console.WriteLine(sidestep + "└──" + dir.Name + " ...");
                     else
-                        Console.WriteLine(sidestep + "├──" + dir);
+                        Console.WriteLine(sidestep + "├──" + dir.Name + " ...");
                 }
             }
             catch (UnauthorizedAccessException)
             {
-                Console.WriteLine("Simon says: You cant see this");
+                Console.WriteLine("Ошибка: Вы не можете это увидеть(секретные данные системы))");
             }
             catch (DirectoryNotFoundException)
             {
-                Console.WriteLine("Simon says: No such directory");
+                Console.WriteLine("Ошибка: такой директории нет");
             }
+            catch
+            {
+                Console.WriteLine("Ошибка: не указан путь");
+            }
+            
         }
         public static void FileTree(string path)
         {
-            int separatorCount = 135;
+            int separatorCount = 136;
             char sym = '=';
             for (int i = 0; i < separatorCount; i++)
             {
@@ -99,36 +125,45 @@ namespace FileManager
 
             try
             {
-                DirectoryInfo input = new DirectoryInfo(path);
+                DirectoryInfo input = new(path);
                 FileInfo[] fileList = input.GetFiles();  //Список файлов в папке
-                Console.WriteLine(string.Format("{0,-65}  {1, -44}  {2, 20}", "File name:", "File attributes:", "File size:"));
+                Console.WriteLine("{0,-69}  {1, -42}  {2, 20}", "File name:", "File attributes:", "File size:");
                 Console.WriteLine();
 
                 foreach (FileInfo file in fileList)
                 {
-                    Console.WriteLine("{0,-65} {1, -46} {2, 20}", file.Name, file.Attributes, file.Length);
+                    if (file.Name.Length > 70)
+                    {
+                        int startIndex = 0;
+                        int length = 60;
+                        Console.WriteLine("{0,-70} {1, -43} {2, 20}", file.Name.Substring(startIndex, length) + "...", file.Attributes, file.Length);
+                    }
+                    else
+                        Console.WriteLine("{0,-70} {1, -43} {2, 20}", file.Name, file.Attributes, file.Length);
                 }
             }
             catch (DirectoryNotFoundException e)
             {
-                Console.WriteLine($"Ошибка: {e.Message}");
+                Console.WriteLine($"Ошибка: Указано неверное имя папки\n{e.Message} ");
             }
             catch (FileNotFoundException e)
             {
                 Console.WriteLine($"Ошибка: {e.Message}");
             }
-
+            catch (ArgumentOutOfRangeException e)
+            {
+                Console.WriteLine($"Ошибка: {e.Message}");
+            }
+            catch
+            {
+                Console.WriteLine("Ошибка: не указан путь");
+            }
         }
-        public static void DirCreateMethod()
+        public static void CopyMethod()
         {
-            Console.WriteLine("Для создания папки используйте ключевое слово create");
-
-            string userCommand = Console.ReadLine();
-
-            Console.WriteLine("Укажите название папки");
-            string name = Console.ReadLine();
-            Directory.CreateDirectory(name);
-
+           
+           
+           
             //switch ()
             //{
             //    case "create":
@@ -139,7 +174,7 @@ namespace FileManager
             //        break;
             //}
         }
-        public static void FileCopyMethod()
+        public static void DeleteMethod()
         {
 
         }

@@ -7,8 +7,8 @@ namespace MyFileManager
     {
         static void Main(string[] args)
         {
-            FileManager.CommandsList(out string userInput);
-            FileManager.UserCommands(userInput);
+            FileManager.InfoList();
+            FileManager.UserCommands();
             Console.WriteLine();
             
             

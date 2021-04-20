@@ -3,7 +3,7 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30907.101
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "FileManager", "FileManager.csproj", "{47C8AD33-E76A-46DA-8C77-99AD65290B10}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "MyFileManager", "MyFileManager.csproj", "{47C8AD33-E76A-46DA-8C77-99AD65290B10}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
