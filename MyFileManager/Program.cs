@@ -7,20 +7,8 @@ namespace MyFileManager
     {
         static void Main(string[] args)
         {
-            FileManager.InfoList();
-            FileManager.UserCommands();
+            FileManager.ManagerStart();
             Console.WriteLine();
-            
-            
-
-
-           
-
-
-
-
         }
-
-
     }
 }
